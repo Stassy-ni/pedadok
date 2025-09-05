@@ -140,7 +140,7 @@
   .section h2{margin:0 0 16px; font-size:clamp(22px,3.2vw,28px)}
   .sub{color:var(--ink-dim); margin:0 0 22px}
   .cases{display:grid; grid-template-columns: repeat(12, 1fr); gap:16px}
-  .case{grid-column: span 4; background: var(--notebook); color:#101827; border-radius:16px; overflow:hidden; position:relative; box-shadow: 0 14px 30px -16px #000, 0 0 0 1px #0000000f inset}
+  .case{grid-column: span 4; background: var(--notebook); color:#101827; border-radius:16px; overflow:hidden; position:relative; box-shadow: 0 14px 30px -16px #000, 0 0 0 1px #0000000f inset; cursor:pointer}
   @media (max-width: 920px){ .case{grid-column: span 6} }
   @media (max-width: 620px){ .case{grid-column: span 12} }
 
@@ -155,7 +155,7 @@
   .tag{font-size:12px; font-weight:800; padding:6px 10px; border-radius:999px; background:#F3F4F6; color:#1F2937}
   .difficulty{background:#FFF1F2; color:#9F1239}
   .time{background:#ECFDF5; color:#065F46}
-  .case .go{position:absolute; right:12px; bottom:12px; border:none; padding:10px 12px; border-radius:10px; cursor:pointer; background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:#08131b; font-weight:900}
+  .case .go{position:absolute; right:12px; bottom:12px; border:none; padding:10px 12px; border-radius:10px; background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:#08131b; font-weight:900; pointer-events:none}
   .case:hover .go{transform: translateY(-2px)}
 
   /* --- Simulators Row --- */
@@ -307,7 +307,7 @@ body.theme-light .btn.secondary{
     <p class="sub">Каждый кейс — как страница тетради: вводная, ситуации, выбор действий, разбор ошибок и чек-лист для практики.</p>
     <div class="cases">
       <!-- Case 1 -->
-      <article class="case" aria-labelledby="c1">
+      <article class="case" aria-labelledby="c1" data-url="case-1.html" tabindex="0" role="link">
         <div class="sheet">
           <h3 id="c1">Конфликт в 7Б: «кто начал?»</h3>
           <p>На перемене словесная перепалка перерастает в толкотню. Классный руководитель в кабинете рядом.</p>
@@ -317,10 +317,10 @@ body.theme-light .btn.secondary{
             <span class="tag">Класс-менеджмент</span>
           </div>
         </div>
-        <button class="go" onclick="toast('Кейс открыт')">Открыть кейс</button>
+        <span class="go" title="Открыть кейс">→</span>
       </article>
       <!-- Case 2 -->
-      <article class="case" aria-labelledby="c2">
+      <article class="case" aria-labelledby="c2" data-url="case-2.html" tabindex="0" role="link">
         <div class="sheet">
           <h3 id="c2">ОВЗ в инклюзивном классе: «добавим поддержку»</h3>
           <p>Ученик с РАС теряет внимание на групповом задании. Как адаптировать инструкции без стигмы?</p>
@@ -330,10 +330,10 @@ body.theme-light .btn.secondary{
             <span class="tag">Инклюзия</span>
           </div>
         </div>
-        <button class="go" onclick="toast('Кейс открыт')">Открыть кейс</button>
+        <span class="go" title="Открыть кейс">→</span>
       </article>
       <!-- Case 3 -->
-      <article class="case" aria-labelledby="c3">
+      <article class="case" aria-labelledby="c3" data-url="case-3.html" tabindex="0" role="link">
         <div class="sheet">
           <h3 id="c3">Оценивание без стресса: «а можно пересдать?»</h3>
           <p>После контрольной половина класса просит «ещё шанс». Формирующие практики в деле.</p>
@@ -343,7 +343,7 @@ body.theme-light .btn.secondary{
             <span class="tag">Оценивание</span>
           </div>
         </div>
-        <button class="go" onclick="toast('Кейс открыт')">Открыть кейс</button>
+        <span class="go" title="Открыть кейс">→</span>
       </article>
     </div>
   </section>
@@ -397,6 +397,7 @@ body.theme-light .btn.secondary{
     <small>WCAG-поддержка, доступные шрифты, режим «меньше анимации», клавиатурная навигация.</small>
   </footer>
 
+<script src="scripts/ui-kit.js"></script>
 <script>
   // Theme toggle
   const themeToggle = document.getElementById('theme');
