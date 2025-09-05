@@ -409,10 +409,17 @@ body.theme-light .btn.secondary{
   });
 
   // Parallax background on mouse move (subtle)
-  document.addEventListener('mousemove', (e)=>{
-    const x = (e.clientX / window.innerWidth - .5) * 4;
-    const y = (e.clientY / window.innerHeight - .5) * 4;
+  let raf = 0;
+  let lastPos = {x: 0, y: 0};
+  function applyParallax(){
+    const x = (lastPos.x / window.innerWidth - .5) * 4;
+    const y = (lastPos.y / window.innerHeight - .5) * 4;
     document.body.style.backgroundPosition = `${50 - x}% ${50 - y}%`;
+    raf = 0;
+  }
+  document.addEventListener('mousemove', (e)=>{
+    lastPos = {x: e.clientX, y: e.clientY};
+    if(!raf){ raf = requestAnimationFrame(applyParallax); }
   }, {passive:true});
 
   // Smooth scroll helper
