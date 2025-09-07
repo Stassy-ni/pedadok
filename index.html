@@ -633,8 +633,7 @@ body.theme-light .btn.secondary{
       const pass = document.getElementById('loginPass').value;
       if(!email || !pass) return showAuthErr('Заполните email и пароль');
       setState({email, name: email.split('@')[0], verified:true, role:'', profile:{}, stage:'done'});
-      toast('Вы вошли');
-      renderAuth();
+      window.location.href = 'dashboard.html';
     };
   }
 
@@ -774,8 +773,7 @@ body.theme-light .btn.secondary{
       const err = validateProfile(role, profile);
       if(err) return showAuthErr(err);
       setState({...s, role, profile, stage:'done'});
-      toast('Профиль сохранён');
-      renderAuth();
+      window.location.href = 'dashboard.html';
     };
 
     function renderRoleFields(r){
