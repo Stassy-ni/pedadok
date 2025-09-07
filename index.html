@@ -245,6 +245,51 @@ body.theme-light .btn.secondary{
   color:#1C1C1E;
 }
 
+/* Auth card */
+.auth-card{
+  background:#111417; border:1px solid #1f2329; border-radius:16px;
+  padding:16px; max-width:420px; margin-left:auto; box-shadow:0 12px 32px -16px #000a;
+}
+.theme-light .auth-card{ background:#fff; border:1px solid #E6E8EB; box-shadow:0 10px 24px -18px rgba(0,0,0,.15); }
+
+.auth-tabs{display:flex; gap:8px; margin-bottom:12px}
+.auth-tab{
+  flex:1; text-align:center; padding:10px 12px; border-radius:10px; cursor:pointer; font-weight:800;
+  background:#1a1e24; color:#EDEFF2; border:1px solid #242932;
+}
+.auth-tab.active{ background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:#1C1303; border-color:transparent; }
+.theme-light .auth-tab{ background:#F4F5F7; color:#1C1C1E; border-color:#E6E8EB }
+.theme-light .auth-tab.active{ color:#1C1303 }
+
+.auth-field{display:flex; align-items:center; margin-bottom:10px; background:#0f1317; border:1px solid #1e232a; border-radius:10px; padding:8px 10px}
+.auth-field input{flex:1; background:transparent; border:none; color:var(--ink); outline:none; font-size:14px}
+.auth-eye{cursor:pointer; opacity:.7}
+.theme-light .auth-field{ background:#FFFFFF; border-color:#E6E8EB }
+
+.auth-actions{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:8px}
+.auth-actions .link{font-size:12px; color:var(--ink-dim); text-decoration:underline; cursor:pointer}
+
+.auth-btn{width:100%; padding:12px 14px; border:none; border-radius:12px; font-weight:900; cursor:pointer;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2)); color:#1C1303;
+  box-shadow: 0 12px 26px -14px rgba(255,176,32,.35);
+}
+
+.auth-consents{margin-top:8px; font-size:12px; color:var(--ink-dim)}
+.auth-consents label{display:flex; gap:8px; align-items:flex-start; margin-top:6px}
+.auth-consents a{color:var(--ink-dim); text-decoration:underline}
+
+.auth-error{margin-top:8px; color:#ff9aa2; font-size:12px}
+
+/* Avatar in header */
+.user-chip{display:flex; align-items:center; gap:10px; margin-right:8px}
+.user-ava{width:28px; height:28px; border-radius:50%; background:linear-gradient(135deg,#2F343C,#1F2937); color:#fff; display:grid; place-items:center; font-size:12px; font-weight:800}
+.user-name{font-weight:700; color:var(--ink)}
+.user-menu{position:relative}
+.user-dd{position:absolute; right:0; top:36px; background:#12161b; border:1px solid #1f2329; border-radius:12px; padding:8px; display:none; min-width:160px; z-index:40}
+.user-dd a{display:block; padding:8px 10px; border-radius:8px; color:var(--ink); text-decoration:none}
+.user-dd a:hover{background:#ffffff10}
+.theme-light .user-dd{ background:#fff; border-color:#E6E8EB }
+
 </style>
 
 </head>
@@ -255,6 +300,7 @@ body.theme-light .btn.secondary{
         <span class="logo-mark" aria-hidden="true"></span>
         <span>PedaDoc</span>
       </a>
+      <div id="userSlot"></div>
       <nav class="nav" aria-label="Главная навигация">
         <a href="#cases">Кейсы</a>
         <a href="#sims">Тренажёры</a>
@@ -288,15 +334,7 @@ body.theme-light .btn.secondary{
             <div class="note" style="transform:rotate(.5deg)">Формирующее оценивание</div>
           </div>
         </div>
-        <!-- Chalkboard doodles / demo simulator preview -->
-        <div aria-hidden="true" style="position:relative; min-height:280px">
-          <canvas id="chalk" width="520" height="280" style="width:100%;height:auto;border-radius:14px;box-shadow:inset 0 0 0 1px #ffffff14"></canvas>
-          <div class="chalk-doodle big" style="top:10px; left:12px;">↳ Вы — педагог</div>
-          <div class="chalk-doodle small" style="bottom:16px; left:8px; animation-delay: .9s">“Как вы отреагируете?”</div>
-          <div class="chalk-doodle small" style="top:16px; right:8px; transform:rotate(6deg); animation-delay: .3s">★ эмпатия</div>
-          <div class="chalk-doodle small" style="bottom:8px; right:14px; transform:rotate(-8deg); animation-delay: 1.2s">✓ структура урока</div>
-          <span class="chalk-line" style="left:0; right:0; top:52%;"></span>
-        </div>
+        <div id="heroRight" style="position:relative; min-height:320px"></div>
       </div>
     </div>
   </section>
@@ -441,32 +479,166 @@ body.theme-light .btn.secondary{
   }
   window.toast = toast;
 
-  // Chalk canvas: draw faint “chalk” as user moves mouse
-  const canvas = document.getElementById('chalk');
-  const ctx = canvas.getContext('2d');
-  let last = null;
-  function dot(x,y){
-    ctx.fillStyle = 'rgba(255,255,255,.7)';
-    for(let i=0;i<6;i++){
-      const ox = (Math.random()-.5)*3;
-      const oy = (Math.random()-.5)*3;
-      ctx.fillRect(x+ox, y+oy, 1, 1);
+  // ===== AUTH STATE (demo) =====
+  const AUTH_KEY = 'pedadoc-auth';
+  function isSignedIn(){ try{ return !!JSON.parse(localStorage.getItem(AUTH_KEY))?.email; }catch{ return false; } }
+  function getUser(){ try{ return JSON.parse(localStorage.getItem(AUTH_KEY)) || null; }catch{ return null; } }
+  function signInDummy(profile){ localStorage.setItem(AUTH_KEY, JSON.stringify(profile)); renderAuth(); toast('Вы вошли'); }
+  function signOut(){ localStorage.removeItem(AUTH_KEY); renderAuth(); toast('Вы вышли'); }
+
+  function initials(name){ return (name||'').split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase() || 'U'; }
+
+  // ===== HEADER: user chip =====
+  function renderHeaderUser(){
+    const slot = document.getElementById('userSlot');
+    const user = getUser();
+    if(!slot) return;
+    if(!user){ slot.innerHTML = ''; return; }
+    slot.innerHTML = `
+      <div class="user-menu">
+        <div class="user-chip" id="userChip" tabindex="0" role="button" aria-haspopup="true">
+          <div class="user-ava">${initials(user.name||user.email)}</div>
+          <div class="user-name">${user.name || user.email}</div>
+        </div>
+        <div class="user-dd" id="userDd">
+          <a href="#track">Мой маршрут</a>
+          <a href="#cases">Мои кейсы</a>
+          <a href="#" id="logoutLink">Выйти</a>
+        </div>
+      </div>`;
+    const chip = slot.querySelector('#userChip');
+    const dd = slot.querySelector('#userDd');
+    const logout = slot.querySelector('#logoutLink');
+    chip.addEventListener('click', ()=> dd.style.display = dd.style.display==='block' ? 'none':'block');
+    document.addEventListener('click', (e)=>{ if(!slot.contains(e.target)) dd.style.display='none'; });
+    logout.addEventListener('click', (e)=>{ e.preventDefault(); signOut(); });
+  }
+
+  // ===== HERO RIGHT: auth form or chalk =====
+  function renderHeroRight(){
+    const host = document.getElementById('heroRight');
+    if(!host) return;
+    if(isSignedIn()){
+      host.innerHTML = `
+        <canvas id="chalk" width="520" height="280" style="width:100%;height:auto;border-radius:14px;box-shadow:inset 0 0 0 1px #ffffff14"></canvas>
+        <div class="chalk-doodle big" style="top:10px; left:12px;">↳ Вы — педагог</div>
+        <div class="chalk-doodle small" style="bottom:16px; left:8px; animation-delay: .9s">“Как вы отреагируете?”</div>
+        <div class="chalk-doodle small" style="top:16px; right:8px; transform:rotate(6deg); animation-delay: .3s">★ эмпатия</div>
+        <div class="chalk-doodle small" style="bottom:8px; right:14px; transform:rotate(-8deg); animation-delay: 1.2s">✓ структура урока</div>
+        <span class="chalk-line" style="left:0; right:0; top:52%;"></span>
+      `;
+      initChalk();
+      const startBtn = document.getElementById('startBtn');
+      if(startBtn){ startBtn.textContent = 'Продолжить маршрут'; startBtn.onclick = ()=>scrollToId('track'); }
+    }else{
+      host.innerHTML = `
+        <div class="auth-card" role="group" aria-label="Вход и регистрация">
+          <div class="auth-tabs">
+            <button class="auth-tab active" id="tabLogin">Вход</button>
+            <button class="auth-tab" id="tabReg">Регистрация</button>
+          </div>
+          <div id="authBody"></div>
+        </div>`;
+      mountLogin();
     }
   }
-  canvas.addEventListener('mousemove', (e)=>{
-    const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX - rect.left) * (canvas.width / rect.width);
-    const y = (e.clientY - rect.top) * (canvas.height / rect.height);
-    dot(x,y);
-    if(last){
-      ctx.strokeStyle = 'rgba(255,255,255,.18)';
-      ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.moveTo(last.x,last.y); ctx.lineTo(x,y); ctx.stroke();
-    }
-    last = {x,y};
-  });
-  canvas.addEventListener('mouseleave', ()=> last=null);
 
+  function mountLogin(){
+    const body = document.getElementById('authBody');
+    body.innerHTML = `
+      <div class="auth-field">
+        <input id="loginEmail" type="email" placeholder="Email" autocomplete="email">
+      </div>
+      <div class="auth-field">
+        <input id="loginPass" type="password" placeholder="Пароль" autocomplete="current-password">
+        <span class="auth-eye" id="eyeLogin">👁</span>
+      </div>
+      <div class="auth-actions">
+        <span class="link" id="forgotLink">Забыли пароль?</span>
+      </div>
+      <button class="auth-btn" id="loginBtn">Войти</button>
+      <div class="auth-error" id="authErr" style="display:none"></div>
+    `;
+    document.getElementById('eyeLogin').onclick = ()=>toggleEye('loginPass');
+    document.getElementById('forgotLink').onclick = ()=>{ toast('Ссылка на сброс отправлена на email'); };
+    document.getElementById('loginBtn').onclick = ()=>{
+      const email = document.getElementById('loginEmail').value.trim();
+      const pass = document.getElementById('loginPass').value;
+      if(!email || !pass) return showAuthErr('Заполните email и пароль');
+      signInDummy({email, name: email.split('@')[0]});
+    };
+    wireTabs();
+  }
+
+  function mountReg(){
+    const body = document.getElementById('authBody');
+    body.innerHTML = `
+      <div class="auth-field">
+        <input id="regName" type="text" placeholder="Имя и фамилия" autocomplete="name">
+      </div>
+      <div class="auth-field">
+        <input id="regEmail" type="email" placeholder="Email" autocomplete="email">
+      </div>
+      <div class="auth-field">
+        <input id="regPass" type="password" placeholder="Пароль" autocomplete="new-password">
+        <span class="auth-eye" id="eye1">👁</span>
+      </div>
+      <div class="auth-field">
+        <input id="regPass2" type="password" placeholder="Повтор пароля" autocomplete="new-password">
+        <span class="auth-eye" id="eye2">👁</span>
+      </div>
+      <div class="auth-consents">
+        <label><input type="checkbox" id="c1"> Согласен(а) на обработку персональных данных</label>
+        <label><input type="checkbox" id="c2"> Принимаю <a href="#" target="_blank">Пользовательское соглашение</a> и <a href="#" target="_blank">Политику конфиденциальности</a></label>
+      </div>
+      <button class="auth-btn" id="regBtn" style="margin-top:10px">Зарегистрироваться</button>
+      <div class="auth-error" id="authErr" style="display:none"></div>
+    `;
+    document.getElementById('eye1').onclick = ()=>toggleEye('regPass');
+    document.getElementById('eye2').onclick = ()=>toggleEye('regPass2');
+    document.getElementById('regBtn').onclick = ()=>{
+      const name = document.getElementById('regName').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
+      const p1 = document.getElementById('regPass').value;
+      const p2 = document.getElementById('regPass2').value;
+      const c1 = document.getElementById('c1').checked;
+      const c2 = document.getElementById('c2').checked;
+      if(!name || !email || !p1 || !p2) return showAuthErr('Заполните все поля');
+      if(p1 !== p2) return showAuthErr('Пароли не совпадают');
+      if(!c1 || !c2) return showAuthErr('Подтвердите согласия');
+      signInDummy({email, name});
+    };
+    wireTabs();
+  }
+
+  function showAuthErr(msg){
+    const err = document.getElementById('authErr'); if(!err) return;
+    err.style.display='block'; err.textContent = msg;
+  }
+  function toggleEye(id){
+    const el = document.getElementById(''+id);
+    el.type = el.type === 'password' ? 'text' : 'password';
+  }
+  function wireTabs(){
+    const tLogin = document.getElementById('tabLogin');
+    const tReg = document.getElementById('tabReg');
+    if(!tLogin || !tReg) return;
+    tLogin.onclick = ()=>{ tLogin.classList.add('active'); tReg.classList.remove('active'); mountLogin(); };
+    tReg.onclick = ()=>{ tReg.classList.add('active'); tLogin.classList.remove('active'); mountReg(); };
+  }
+
+  // Chalk init (теперь вызывается только когда холст реально в DOM)
+  function initChalk(){
+    const canvas = document.getElementById('chalk'); if(!canvas) return;
+    const ctx = canvas.getContext('2d'); let last = null;
+    function dot(x,y){ ctx.fillStyle='rgba(255,255,255,.7)'; for(let i=0;i<6;i++){ const ox=(Math.random()-.5)*3; const oy=(Math.random()-.5)*3; ctx.fillRect(x+ox,y+oy,1,1);} }
+    canvas.addEventListener('mousemove', (e)=>{ const r=canvas.getBoundingClientRect(); const x=(e.clientX-r.left)*(canvas.width/r.width); const y=(e.clientY-r.top)*(canvas.height/r.height); dot(x,y); if(last){ ctx.strokeStyle='rgba(255,255,255,.18)'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(last.x,last.y); ctx.lineTo(x,y); ctx.stroke(); } last={x,y}; });
+    canvas.addEventListener('mouseleave', ()=> last=null);
+  }
+
+  // первый рендер
+  function renderAuth(){ renderHeaderUser(); renderHeroRight(); }
+  renderAuth();
   // Keyboard focus outline visible for accessibility
   document.addEventListener('keydown', (e)=>{ if(e.key === 'Tab'){ document.body.classList.add('kbd'); }});
 </script>
