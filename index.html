@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PedaDoc — Практика педагогики</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Architects+Daughter&display=swap" rel="stylesheet">
+<style>
+  /* === Graphite (dark) — no blue undertone === */
+  :root{
+    --bg:#0E0F12;
+    --panel:rgba(255,255,255,.06);
+    --ink:#F2F2F3;
+    --ink-dim:#A5A6AA;
+
+    --accent:#FFB020;   /* amber */
+    --accent-2:#34C759; /* mint/green */
+
+    --warning:#FFC766;
+    --chalk:#F4F4F4;
+    --note:#FFF2B2;
+    --notebook:#FFFFFF;
+    --grid:#FFFFFF12;
+    --glow: drop-shadow(0 0 10px rgba(255,176,32,.25));
+  }
+
+  /* === Porcelain (light) — warm-neutral === */
+  .theme-light{
+    --bg:#F7F8FA;
+    --panel:rgba(255,255,255,.72);
+    --ink:#1C1C1E;
+    --ink-dim:#6B7280;
+
+    --accent:#1F2937;   /* graphite accent for outlines */
+    --accent-2:#FFB020; /* amber CTA */
+
+    --warning:#F59E0B;
+    --chalk:#1F2937;
+    --note:#FFF1B3;
+    --notebook:#FFFFFF;
+    --grid:#1F232910;
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    color:var(--ink);
+    /* фон без синего подтона */
+    background:
+      radial-gradient(1200px 700px at 80% -10%, #181A1F 0%, #0E0F12 55%),
+      var(--bg);
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Helvetica Neue", sans-serif;
+    background-attachment: fixed;
+  }
+
+  /* --- Header --- */
+  .topbar{
+    position:sticky; top:0; z-index:50;
+    backdrop-filter: blur(10px);
+    background: linear-gradient(180deg, rgba(16,16,18,.75), rgba(16,16,18,.35));
+    border-bottom: 1px solid #ffffff12;
+  }
+  .wrap{max-width:1200px; margin:0 auto; padding:14px 20px; display:flex; align-items:center; gap:16px}
+  .logo{
+    display:flex; align-items:center; gap:10px; text-decoration:none;
+    color:var(--ink); font-weight:800; letter-spacing:.5px;
+  }
+
+  /* Лого без синего — тонкий графит с янтарной полосой */
+  .logo-mark{
+    width:34px; height:34px; border-radius:8px; position:relative; overflow:hidden;
+    background: conic-gradient(from 210deg,
+      #2B2D31 0 35%, #3C3F45 35% 78%, #FFB020 78% 82%, #2B2D31 82% 100%);
+    filter: var(--glow);
+  }
+  .logo-mark::after{
+    content:""; position:absolute; inset:2px; border-radius:7px; background:#0E0F12AA; box-shadow: inset 0 0 0 1.5px #ffffff38;
+  }
+
+  .nav{margin-left:auto; display:flex; gap:18px; flex-wrap:wrap}
+  .nav a{color:var(--ink); text-decoration:none; font-weight:600; padding:8px 12px; border-radius:10px}
+  .nav a:hover{background:#ffffff10}
+
+  .pill{
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color:#1C1303; border:none; font-weight:800; padding:10px 16px; border-radius:999px; cursor:pointer;
+    /* убрали голубые тени */
+    box-shadow: 0 10px 24px -10px rgba(255,176,32,.45), 0 2px 0 #FFE0A8 inset;
+  }
+
+  /* --- Hero Blackboard --- */
+  .hero{
+    position:relative; overflow:hidden;
+    border-radius:20px; margin:22px auto; max-width:1200px;
+    box-shadow: 0 12px 40px rgba(0,0,0,.35);
+  }
+  /* Доска: серо-графитовый радиальный фон без синего */
+  .blackboard{
+    background: radial-gradient(1100px 620px at 12% 18%, #14161A 0%, #0F1114 55%, #0B0C0F 100%);
+    border:2px solid #22252B; border-radius:20px; position:relative; padding:48px 28px;
+  }
+  .chalk-grid{
+    position:absolute; inset:0; background:
+      linear-gradient(transparent 39px, var(--grid) 40px),
+      linear-gradient(90deg, transparent 39px, var(--grid) 40px);
+    background-size:40px 40px; pointer-events:none; border-radius:18px;
+  }
+  .hero-content{position:relative; display:grid; grid-template-columns: 1.2fr 1fr; gap:24px; align-items:center}
+  .hero h1{margin:0 0 10px; font-size: clamp(28px, 5vw, 48px); line-height:1.05; font-weight:800; letter-spacing:.2px; filter: var(--glow)}
+  .hero p{color:var(--ink-dim); margin:0 0 22px; font-size:clamp(15px, 2.2vw, 18px)}
+  .hero-cta{display:flex; gap:12px; flex-wrap:wrap}
+
+  /* Герой-кнопки — без синего свечения */
+  .hero .btn{
+    box-shadow: 0 14px 30px -12px rgba(255,176,32,.55), 0 0 0 1px #FFE0A8 inset;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color:#1C1303; border:none; padding:12px 16px; border-radius:12px; font-weight:800; cursor:pointer;
+  }
+  .btn.secondary{
+    background: linear-gradient(135deg, #2F343C, #1F2937);
+    box-shadow: 0 14px 30px -12px rgba(31,41,55,.6), 0 0 0 1px #D1D5DB inset;
+    color:#F2F2F3;
+  }
+
+  .chalk-doodle{font-family:"Architects Daughter", system-ui; color:var(--chalk); opacity:.9; position:absolute; white-space:nowrap; transform:rotate(-3deg); filter: drop-shadow(0 2px 0 #0008); animation: floaty 9s ease-in-out infinite}
+  .chalk-doodle.small{font-size:16px}
+  .chalk-doodle.big{font-size:26px}
+  @keyframes floaty{0%,100%{transform: translateY(0) rotate(-3deg)} 50%{transform: translateY(-6px) rotate(-2deg)}}
+  .chalk-line{position:absolute; height:2px; background:linear-gradient(90deg, transparent, #fff, transparent); opacity:.3}
+
+  /* --- Sticky Skill Notes --- */
+  .skills{display:flex; gap:14px; flex-wrap:wrap; margin-top:10px}
+  .note{background: var(--note); color:#1f2937; padding:10px 12px; border-radius:10px; transform: rotate(-1.5deg); box-shadow: 0 12px 18px -10px #0008, 0 0 0 1px #00000014 inset; font-weight:700; position:relative}
+  .note::before{content:""; position:absolute; width:26px; height:8px; background:#ff7eb6; top:-6px; left:12px; transform:rotate(-6deg); border-radius:3px; box-shadow:0 3px 0 #00000020}
+
+  /* --- Case Cards (Notebooks) --- */
+  .section{max-width:1200px; margin:36px auto; padding:0 20px}
+  .section h2{margin:0 0 16px; font-size:clamp(22px,3.2vw,28px)}
+  .sub{color:var(--ink-dim); margin:0 0 22px}
+  .cases{display:grid; grid-template-columns: repeat(12, 1fr); gap:16px}
+  .case{grid-column: span 4; background: var(--notebook); color:#101827; border-radius:16px; overflow:hidden; position:relative; box-shadow: 0 14px 30px -16px #000, 0 0 0 1px #0000000f inset}
+  @media (max-width: 920px){ .case{grid-column: span 6} }
+  @media (max-width: 620px){ .case{grid-column: span 12} }
+
+  .sheet{
+    background:
+      repeating-linear-gradient(#E6EAF1 0 2px, #E6EAF1 2px 40px),
+      linear-gradient(90deg, #E46464 0 2px, transparent 2px 100%);
+    padding:18px 16px 16px 24px; min-height:180px;
+  }
+  .sheet h3{margin:0 0 8px; font-size:18px}
+  .meta{display:flex; gap:10px; flex-wrap:wrap; margin:10px 0 0}
+  .tag{font-size:12px; font-weight:800; padding:6px 10px; border-radius:999px; background:#F3F4F6; color:#1F2937}
+  .difficulty{background:#FFF1F2; color:#9F1239}
+  .time{background:#ECFDF5; color:#065F46}
+  .case .go{position:absolute; right:12px; bottom:12px; border:none; padding:10px 12px; border-radius:10px; cursor:pointer; background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:#08131b; font-weight:900}
+  .case:hover .go{transform: translateY(-2px)}
+
+  /* --- Simulators Row --- */
+  .sims{display:flex; gap:14px; overflow:auto; padding-bottom:4px; scroll-snap-type:x mandatory}
+  .sim{min-width:240px; scroll-snap-align:start; background: var(--panel); border:1px solid #ffffff10; border-radius:16px; padding:16px; backdrop-filter: blur(8px)}
+  .sim h4{margin:0 0 8px}
+  .progress{height:8px; border-radius:6px; background:#ffffff16; overflow:hidden}
+  .bar{height:100%; width:40%; background: linear-gradient(90deg, var(--accent), var(--accent-2))}
+  .micro{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap}
+  .micro .chip{font-size:12px; padding:6px 8px; border-radius:999px; background:#ffffff12; border:1px solid #ffffff1f}
+
+  /* --- CTA board --- (замена синего на графит) */
+  .cta{
+    margin:40px 0 10px;
+    background: linear-gradient(135deg, #2A2D32, #121315);
+    border:1px solid #2E3137; border-radius:16px; padding:18px;
+    display:grid; grid-template-columns: 1fr auto; gap:16px; align-items:center
+  }
+
+  /* --- Footer --- */
+  footer{margin:40px auto 80px; max-width:1200px; color:var(--ink-dim); padding:0 20px}
+
+  /* Accessibility & Motion */
+  @media (prefers-reduced-motion: reduce){*{animation:none !important; transition:none !important}}
+
+  /* Theme Toggle */
+  .toggle{display:inline-flex; gap:8px; align-items:center; margin-left:6px; user-select:none; color:var(--ink-dim); font-size:14px}
+  .toggle input{appearance:none; width:44px; height:24px; background:#00000050; border:1px solid #ffffff33; border-radius:999px; position:relative; cursor:pointer}
+  .toggle input::after{content:""; position:absolute; width:18px; height:18px; border-radius:50%; background:#fff; top:2px; left:2px; transition:.25s; box-shadow:0 2px 6px #0005}
+  .toggle input:checked{background:#ffffffaa}
+  .toggle input:checked::after{left:24px}
+
+/* === LIGHT THEME FIX: override hardcoded dark backgrounds === */
+body.theme-light{
+  /* светлый общий фон без синевы */
+  background:
+    radial-gradient(1200px 700px at 80% -10%, #F2F3F5 0%, #F7F8FA 55%),
+    var(--bg);
+}
+
+body.theme-light .topbar{
+  background: linear-gradient(180deg, rgba(250,250,251,.80), rgba(250,250,251,.55));
+  border-bottom: 1px solid #00000010;
+  backdrop-filter: blur(10px);
+}
+
+body.theme-light .blackboard{
+  /* светлая «доска»-панель (как белая доска / флипчарт) */
+  background: radial-gradient(1100px 620px at 12% 18%,
+    #FFFFFF 0%, #FAFBFC 55%, #F5F7FA 100%);
+  border:2px solid #E5E7EB;
+}
+
+body.theme-light .chalk-grid{
+  /* более мягкая сетка в светлой теме */
+  background:
+    linear-gradient(transparent 39px, #1F232910 40px),
+    linear-gradient(90deg, transparent 39px, #1F232910 40px);
+}
+
+body.theme-light .cta{
+  background: linear-gradient(135deg, #FFFFFF, #F5F6F7);
+  border:1px solid #E5E7EB;
+}
+
+body.theme-light .note{
+  /* стикеры в светлой теме чуть светлее */
+  background: #FFF4BE;
+  color: #1F2937;
+}
+
+body.theme-light .sheet{
+  /* тетрадный лист без синего подтона */
+  background:
+    repeating-linear-gradient(#E8EBF0 0 2px, #E8EBF0 2px 40px),
+    linear-gradient(90deg, #EB6A6A 0 2px, transparent 2px 100%);
+}
+
+/* кнопки: акценты оставляем, но убираем «тёмные» блики */
+body.theme-light .hero .btn{
+  box-shadow: 0 12px 26px -14px rgba(255,176,32,.45), 0 0 0 1px #FFE0A8 inset;
+  color:#1C1303;
+}
+body.theme-light .btn.secondary{
+  background: linear-gradient(135deg, #F1F3F5, #E7EAEE);
+  box-shadow: 0 12px 26px -14px rgba(31,41,55,.18), 0 0 0 1px #E5E7EB inset;
+  color:#1C1C1E;
+}
+
+</style>
+
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap">
+      <a class="logo" href="#">
+        <span class="logo-mark" aria-hidden="true"></span>
+        <span>PedaDoc</span>
+      </a>
+      <nav class="nav" aria-label="Главная навигация">
+        <a href="#cases">Кейсы</a>
+        <a href="#sims">Тренажёры</a>
+        <a href="#track">Маршрут</a>
+        <a href="#diagnostics">Диагностика</a>
+      </nav>
+      <button class="pill" id="startBtn">Старт практики</button>
+      <label class="toggle" title="Светлая тема">
+        <span>светло</span>
+        <input id="theme" type="checkbox" aria-label="Переключить тему">
+      </label>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="blackboard">
+      <div class="chalk-grid"></div>
+      <div class="hero-content wrap">
+        <div>
+          <h1 id="hero-title">Практика педагогики: от кейсов — к уверенным урокам</h1>
+          <p>Решай реальные ситуации — конфликт на перемене, работа с ОВЗ, оценивание без стресса. В тренажёрах — обратная связь и подсказки методистов.</p>
+          <div class="hero-cta">
+            <button class="btn" onclick="scrollToId('cases')">Начать с кейса</button>
+            <button class="btn secondary" onclick="scrollToId('sims')">Перейти к тренажёрам</button>
+          </div>
+          <div class="skills" aria-label="Компетенции">
+            <div class="note">Класс-менеджмент</div>
+            <div class="note" style="transform:rotate(1.5deg)">Коммуникация с родителями</div>
+            <div class="note" style="transform:rotate(-3deg)">Инклюзия</div>
+            <div class="note" style="transform:rotate(.5deg)">Формирующее оценивание</div>
+          </div>
+        </div>
+        <!-- Chalkboard doodles / demo simulator preview -->
+        <div aria-hidden="true" style="position:relative; min-height:280px">
+          <canvas id="chalk" width="520" height="280" style="width:100%;height:auto;border-radius:14px;box-shadow:inset 0 0 0 1px #ffffff14"></canvas>
+          <div class="chalk-doodle big" style="top:10px; left:12px;">↳ Вы — педагог</div>
+          <div class="chalk-doodle small" style="bottom:16px; left:8px; animation-delay: .9s">“Как вы отреагируете?”</div>
+          <div class="chalk-doodle small" style="top:16px; right:8px; transform:rotate(6deg); animation-delay: .3s">★ эмпатия</div>
+          <div class="chalk-doodle small" style="bottom:8px; right:14px; transform:rotate(-8deg); animation-delay: 1.2s">✓ структура урока</div>
+          <span class="chalk-line" style="left:0; right:0; top:52%;"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CASES -->
+  <section id="cases" class="section">
+    <h2>Кейсы недели</h2>
+    <p class="sub">Каждый кейс — как страница тетради: вводная, ситуации, выбор действий, разбор ошибок и чек-лист для практики.</p>
+    <div class="cases">
+      <!-- Case 1 -->
+      <article class="case" aria-labelledby="c1">
+        <div class="sheet">
+          <h3 id="c1">Конфликт в 7Б: «кто начал?»</h3>
+          <p>На перемене словесная перепалка перерастает в толкотню. Классный руководитель в кабинете рядом.</p>
+          <div class="meta">
+            <span class="tag difficulty">ур. 2</span>
+            <span class="tag time">15 мин</span>
+            <span class="tag">Класс-менеджмент</span>
+          </div>
+        </div>
+        <button class="go" onclick="toast('Кейс открыт')">Открыть кейс</button>
+      </article>
+      <!-- Case 2 -->
+      <article class="case" aria-labelledby="c2">
+        <div class="sheet">
+          <h3 id="c2">ОВЗ в инклюзивном классе: «добавим поддержку»</h3>
+          <p>Ученик с РАС теряет внимание на групповом задании. Как адаптировать инструкции без стигмы?</p>
+          <div class="meta">
+            <span class="tag difficulty">ур. 3</span>
+            <span class="tag time">20 мин</span>
+            <span class="tag">Инклюзия</span>
+          </div>
+        </div>
+        <button class="go" onclick="toast('Кейс открыт')">Открыть кейс</button>
+      </article>
+      <!-- Case 3 -->
+      <article class="case" aria-labelledby="c3">
+        <div class="sheet">
+          <h3 id="c3">Оценивание без стресса: «а можно пересдать?»</h3>
+          <p>После контрольной половина класса просит «ещё шанс». Формирующие практики в деле.</p>
+          <div class="meta">
+            <span class="tag difficulty">ур. 1</span>
+            <span class="tag time">10 мин</span>
+            <span class="tag">Оценивание</span>
+          </div>
+        </div>
+        <button class="go" onclick="toast('Кейс открыт')">Открыть кейс</button>
+      </article>
+    </div>
+  </section>
+
+  <!-- SIMULATORS -->
+  <section id="sims" class="section">
+    <h2>Тренажёры</h2>
+    <p class="sub">Мини-ситуации с мгновенной обратной связью и подсказками из методических стандартов.</p>
+    <div class="sims">
+      <div class="sim">
+        <h4>Диалог с родителем</h4>
+        <div class="progress" aria-label="Прогресс"><div class="bar" style="width:65%"></div></div>
+        <div class="micro">
+          <div class="chip">я-сообщения</div><div class="chip">деэскалация</div><div class="chip">границы</div>
+        </div>
+      </div>
+      <div class="sim">
+        <h4>Управление классом</h4>
+        <div class="progress"><div class="bar" style="width:40%"></div></div>
+        <div class="micro">
+          <div class="chip">правила</div><div class="chip">ритуалы</div><div class="chip">тайминг</div>
+        </div>
+      </div>
+      <div class="sim">
+        <h4>Инклюзия и UDL</h4>
+        <div class="progress"><div class="bar" style="width:20%"></div></div>
+        <div class="micro">
+          <div class="chip">визуальные опоры</div><div class="chip">чек-листы</div>
+        </div>
+      </div>
+      <div class="sim">
+        <h4>Формирующее оценивание</h4>
+        <div class="progress"><div class="bar" style="width:80%"></div></div>
+        <div class="micro">
+          <div class="chip">рубрикаторы</div><div class="chip">самооценка</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cta" id="track">
+      <div>
+        <strong>Ваш маршрут готов</strong><br/>
+        Следующий шаг: «Диалог с родителем → Урок-структура → Кейс “7Б”». Завершите и получите бейдж «Класс-менеджер».
+      </div>
+      <button class="pill" onclick="toast('Маршрут запущен')">Запустить маршрут</button>
+    </div>
+  </section>
+
+  <footer>
+    © PedaDoc • Методическая поддержка и практика для студентов педспециальностей. <br/>
+    <small>WCAG-поддержка, доступные шрифты, режим «меньше анимации», клавиатурная навигация.</small>
+  </footer>
+
+<script>
+  // Theme toggle
+  const themeToggle = document.getElementById('theme');
+  const lsKey = 'pedadoc-theme';
+  const saved = localStorage.getItem(lsKey);
+  if(saved === 'light'){ document.body.classList.add('theme-light'); themeToggle.checked = true; }
+  themeToggle.addEventListener('change', () => {
+    document.body.classList.toggle('theme-light', themeToggle.checked);
+    localStorage.setItem(lsKey, themeToggle.checked ? 'light' : 'dark');
+  });
+
+  // Parallax background on mouse move (subtle)
+  let raf = 0;
+  let lastPos = {x: 0, y: 0};
+  function applyParallax(){
+    const x = (lastPos.x / window.innerWidth - .5) * 4;
+    const y = (lastPos.y / window.innerHeight - .5) * 4;
+    document.body.style.backgroundPosition = `${50 - x}% ${50 - y}%`;
+    raf = 0;
+  }
+  document.addEventListener('mousemove', (e)=>{
+    lastPos = {x: e.clientX, y: e.clientY};
+    if(!raf){ raf = requestAnimationFrame(applyParallax); }
+  }, {passive:true});
+
+  // Smooth scroll helper
+  function scrollToId(id){ document.getElementById(id)?.scrollIntoView({behavior:'smooth'}); }
+
+  // Minimal toast
+  function toast(text){
+    const t = document.createElement('div');
+    t.textContent = text;
+    Object.assign(t.style,{
+      position:'fixed', bottom:'24px', left:'50%', transform:'translateX(-50%)',
+      background:'linear-gradient(135deg, #FFB020, #34C759)',
+      color:'#1C1303', padding:'10px 14px', borderRadius:'12px', fontWeight:'800', zIndex:1000,
+      boxShadow:'0 12px 28px -12px rgba(255,176,32,.55)', border:'1px solid #FFE0A8'
+    });
+    document.body.appendChild(t);
+    setTimeout(()=>{ t.style.opacity='0'; t.style.transition='opacity .4s'; }, 800);
+    setTimeout(()=> t.remove(), 1200);
+  }
+  window.toast = toast;
+
+  // Chalk canvas: draw faint “chalk” as user moves mouse
+  const canvas = document.getElementById('chalk');
+  const ctx = canvas.getContext('2d');
+  let last = null;
+  function dot(x,y){
+    ctx.fillStyle = 'rgba(255,255,255,.7)';
+    for(let i=0;i<6;i++){
+      const ox = (Math.random()-.5)*3;
+      const oy = (Math.random()-.5)*3;
+      ctx.fillRect(x+ox, y+oy, 1, 1);
+    }
+  }
+  canvas.addEventListener('mousemove', (e)=>{
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+    const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+    dot(x,y);
+    if(last){
+      ctx.strokeStyle = 'rgba(255,255,255,.18)';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(last.x,last.y); ctx.lineTo(x,y); ctx.stroke();
+    }
+    last = {x,y};
+  });
+  canvas.addEventListener('mouseleave', ()=> last=null);
+
+  // Keyboard focus outline visible for accessibility
+  document.addEventListener('keydown', (e)=>{ if(e.key === 'Tab'){ document.body.classList.add('kbd'); }});
+</script>
+</body>
+</html>
